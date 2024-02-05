@@ -1,11 +1,35 @@
 import { useEffect, useState } from "react";
 import classes from "./App.module.css";
+import Sound from "./assets/notify.mp3";
+import { Howl } from "howler";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function App() {
   const [count, setCount] = useState(0);
 
+  const sound = new Howl({
+    src: [Sound],
+  });
+
+  const toastify = () => {
+    toast(
+      <span>
+        💊 It`s Medicine Time! <br /> Please eat your medicines!
+      </span>,
+      {
+        autoClose: 30 * 1000,
+        closeButton: false,
+        onClick: () => {
+          sound.stop();
+        },
+      }
+    );
+    sound.play();
+  };
+
   useEffect(() => {
-    const socket = new WebSocket("ws://127.0.0.1:8000/ws");
+    const socket = new WebSocket("ws://127.0.0.1:8080/ws");
 
     socket.onopen = () => {
       console.log("WebSocket connection opened...");
@@ -14,6 +38,7 @@ export default function App() {
     socket.onmessage = (event) => {
       console.log("Received message:", event.data);
       setCount((prev) => prev + 1);
+      toastify();
     };
 
     socket.onclose = () => {
@@ -22,8 +47,12 @@ export default function App() {
   }, []);
 
   return (
-    <div className={classes.app}>
-      <h2>Trigger:</h2> <h1>{count}</h1>
-    </div>
+    <>
+      <ToastContainer />
+      <div className={classes.app}>
+        <h2>Trigger:</h2> <h1>{count}</h1>
+        <button onClick={toastify}>Triggering Notification</button>
+      </div>
+    </>
   );
 }
