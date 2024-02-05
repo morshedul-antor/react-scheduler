@@ -28,6 +28,28 @@ export default function App() {
     sound.play();
   };
 
+  const [hasMounted, setHasMounted] = useState(false);
+  const checkTimeInData = () => {
+    const date = new Date();
+    const time = `${date.getHours()}:${date.getMinutes()}`;
+    const data = ["17:44", "17:45", "17:50"];
+
+    if (data.includes(time) && hasMounted) {
+      toastify();
+    }
+  };
+
+  useEffect(() => {
+    if (!hasMounted) {
+      setHasMounted(true);
+      checkTimeInData();
+    }
+
+    const intervalId = setInterval(checkTimeInData, 59 * 1000);
+    return () => clearInterval(intervalId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasMounted]);
+
   useEffect(() => {
     const socket = new WebSocket("ws://127.0.0.1:8080/ws");
 
